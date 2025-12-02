@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiệp Cưới - Mạnh Dũng & Ngọc Ánh</title>
+    
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- REACT LIBRARIES (CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- BABEL FOR JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        script: ['"Great Vibes"', 'cursive'],
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                        xmas: ['"Mountains of Christmas"', 'cursive'],
+                    },
+                    colors: {
+                        'soft-pink': '#FFF0F5',
+                        'deep-rose': '#9F1239',
+                        'rose-gold': '#E11D48',
+                        'gold': '#D4AF37',
+                        'xmas-red': '#C41E3A',
+                        'xmas-green': '#165B33'
+                    },
+                    animation: {
+                        'scroll-up': 'scrollUp 60s linear infinite',
+                        'scroll-down': 'scrollDown 60s linear infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 4s linear infinite',
+                        'climb-side': 'climbSide 3s ease-in-out infinite alternate', 
+                        'crawl-top': 'crawlTop 4s linear infinite alternate',
+                        'swing-hang': 'swingHang 2s ease-in-out infinite',
+                        'peek-aboo': 'peekAboo 3s ease-in-out infinite',
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        scrollUp: {
+                            '0%': { transform: 'translateY(0)' },
+                            '100%': { transform: 'translateY(-50%)' },
+                        },
+                        scrollDown: {
+                            '0%': { transform: 'translateY(-50%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        climbSide: {
+                            '0%': { transform: 'translateY(20px) rotate(-10deg)' },
+                            '100%': { transform: 'translateY(-20px) rotate(10deg)' }
+                        },
+                        crawlTop: {
+                            '0%': { transform: 'translateX(-100%) rotate(0deg)' },
+                            '20%': { transform: 'translateX(-100%) rotate(-5deg)' }, 
+                            '80%': { transform: 'translateX(100%) rotate(5deg)' },
+                            '100%': { transform: 'translateX(100%) rotate(0deg)' }
+                        },
+                        swingHang: {
+                            '0%, 100%': { transform: 'rotate(15deg)' },
+                            '50%': { transform: 'rotate(-15deg)' }
+                        },
+                        peekAboo: {
+                            '0%, 80%': { transform: 'translateY(0)' },
+                            '40%, 60%': { transform: 'translateY(-25px)' }
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .falling-item {
+            position: fixed;
+            top: -10vh;
+            z-index: 50;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #FFF0F5; }
+        ::-webkit-scrollbar-thumb { background: #E11D48; border-radius: 3px; }
+        
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .flip-card-front img { transition: transform 10s ease; }
+        .flip-card:hover .flip-card-front img { transform: scale(1.2); }
+        .flip-card-back {
+            background: linear-gradient(135deg, #FFF0F5 0%, #ffe4e6 100%);
+            color: #9F1239;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fecdd3;
+        }
+
+        /* Wish Card Animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .wish-card-animate {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- REACT GLOBALS ---
+        const { useState, useEffect, useRef } = React;
+
+        // --- DATA (wedding-data.ts) ---
+        const weddingData = {
+            heroImages: {
+                col1: [
+                    "https://images.unsplash.com/photo-1511285560982-1351cdeb9821?w=400&q=80",
+                    "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80",
+                    "https://images.unsplash.com/photo-1621621667797-e06afc217fb0?w=400&q=80",
+                    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&q=80",
+                ],
+                col2: [
+                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+                    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=400&q=80",
+                    "https://images.unsplash.com/photo-1522673607200-1645062ac2d4?w=400&q=80",
+                ],
+                col3: [
+                    "https://images.unsplash.com/photo-1595838788863-70d3c488819f?w=400&q=80",
+                    "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400&q=80",
+                    "https://images.unsplash.com/photo-1519225448526-0a029515560d?w=400&q=80",
+                ],
+                col4: [
+                    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80",
+                    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&q=80",
+                ],
+                col5: [
+                    "https://images.unsplash.com/photo-1520854221256-17451cc330e7?w=400&q=80",
+                    "https://images.unsplash.com/photo-1511285560982-1351cdeb9821?w=400&q=80",
+                ]
+            },
+            loveStory: {
+                firstMeet: "https://images.unsplash.com/photo-1522673607200-1645062ac2d4?w=600&q=80",
+                proposal: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&q=80"
+            },
+            gallery: [
+                {
+                    src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
+                    icon: "fas fa-heart",
+                    title: "Together",
+                    subtitle: "Since 2020",
+                    heightClass: "h-80",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&q=80",
+                    icon: "fas fa-camera",
+                    title: "Happy Day",
+                    heightClass: "h-64",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1511285560982-1351cdeb9821?w=600&q=80",
+                    icon: "fas fa-kiss-wink-heart",
+                    title: "Love You",
+                    heightClass: "h-96",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80",
+                    icon: "fas fa-snowflake",
+                    title: "Winter Love",
+                    heightClass: "h-72",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1520854221256-17451cc330e7?w=600&q=80",
+                    icon: "fas fa-ring",
+                    title: "Forever",
+                    heightClass: "h-64",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
+                    icon: "fas fa-gift",
+                    title: "Our Gift",
+                    heightClass: "h-80",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?w=600&q=80",
+                    icon: "fas fa-dove",
+                    title: "Peace",
+                    heightClass: "h-64",
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1529636721198-d8977464d262?w=600&q=80",
+                    icon: "fas fa-star",
+                    title: "Dreamy",
+                    heightClass: "h-72",
+                },
+            ],
+            weddingEvents: {
+                groom: {
+                    title: "Lễ Thành Hôn",
+                    locationName: "Tư gia Nhà Trai",
+                    address: "TDP Cam Giá 4, Phường Gia Sàng, Thái Nguyên",
+                    time: "10:00 AM",
+                    date: "Chủ Nhật, 21 Tháng 12, 2025",
+                    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d575.5387117163806!2d105.87879367518552!3d21.56626051163245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab5904b9edd3%3A0x6c8112f7f200f5c2!2zTmjDoCBWxrDhu51uIFTDuW5nIE5pbmg!5e1!3m2!1svi!2s!4v1764643690863!5m2!1svi!2s"
+                },
+                bride: {
+                    title: "Lễ Vu Quy",
+                    locationName: "Tư gia Nhà Gái",
+                    address: "Xóm Làng Mon, Xã Tân Cương, Thái Nguyên",
+                    time: "08:00 AM",
+                    date: "Chủ Nhật, 21 Tháng 12, 2025",
+                    mapUrl: "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d1151.2273995989844!2d105.8217652696278!3d21.547365246145525!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjHCsDMyJzUwLjUiTiAxMDXCsDQ5JzIwLjciRQ!5e1!3m2!1svi!2s!4v1764643768664!5m2!1svi!2s"
+                }
+            }
+        };
+
+        // --- COMPONENTS ---
+
+        // 1. FallingEffect
+        const FallingEffect = () => {
+          const [items, setItems] = useState([]);
+
+          useEffect(() => {
+            const icons = [
+                '<i class="fas fa-heart text-rose-400 text-opacity-40"></i>',
+                '<i class="fas fa-snowflake text-blue-200 text-opacity-60"></i>',
+                '<span class="text-rose-300 text-opacity-60">🌸</span>'
+            ];
+
+            const interval = setInterval(() => {
+              const id = Date.now();
+              const content = icons[Math.floor(Math.random() * icons.length)];
+              const left = Math.random() * 100 + 'vw';
+              const duration = Math.random() * 5 + 8 + 's';
+              const fontSize = Math.random() * 15 + 10 + 'px';
+
+              setItems(prev => [...prev, { id, content, left, duration, fontSize }]);
+
+              setTimeout(() => {
+                setItems(prev => prev.filter(item => item.id !== id));
+              }, 13000); 
+            }, 400);
+
+            return () => clearInterval(interval);
+          }, []);
+
+          return (
+            <React.Fragment>
+              {items.map(item => (
+                <div
+                  key={item.id}
+                  className="falling-item"
+                  style={{
+                    left: item.left,
+                    animationDuration: item.duration,
+                    fontSize: item.fontSize,
+                  }}
+                  dangerouslySetInnerHTML={{ __html: item.content }}
+                />
+              ))}
+            </React.Fragment>
+          );
+        };
+
+        // 2. MusicPlayer
+        const MusicPlayer = () => {
+          const [isPlaying, setIsPlaying] = useState(false);
+          const audioRef = useRef(null);
+          const [hasInteracted, setHasInteracted] = useState(false);
+
+          useEffect(() => {
+            const playPromise = audioRef.current?.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setIsPlaying(true);
+                })
+                .catch(() => {
+                  setIsPlaying(false);
+                });
+            }
+
+            const handleFirstInteraction = () => {
+                if (!hasInteracted && audioRef.current && audioRef.current.paused) {
+                    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+                    setHasInteracted(true);
+                }
+            };
+
+            window.addEventListener('click', handleFirstInteraction);
+            return () => window.removeEventListener('click', handleFirstInteraction);
+          }, [hasInteracted]);
+
+          const toggleMusic = () => {
+            if (!audioRef.current) return;
+
+            if (isPlaying) {
+              audioRef.current.pause();
+            } else {
+              audioRef.current.play().catch(e => console.error("Play error:", e));
+            }
+            setIsPlaying(!isPlaying);
+          };
+
+          return (
+            <div className="fixed bottom-6 right-6 z-[100]">
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMusic();
+                    }} 
+                    className={`w-12 h-12 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-deep-rose border border-rose-200 hover:scale-110 transition duration-300 ${isPlaying ? 'animate-spin-slow' : 'animate-pulse-slow'}`}
+                >
+                    <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-music'}`}></i>
+                </button>
+                <audio ref={audioRef} loop>
+                    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
+                </audio>
+            </div>
+          );
+        };
+
+        // 3. Hero
+        const Hero = () => {
+          const [timeLeft, setTimeLeft] = useState({
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+          });
+
+          useEffect(() => {
+            const weddingDate = new Date(2025, 11, 21, 10, 0, 0).getTime();
+
+            const timer = setInterval(() => {
+              const now = new Date().getTime();
+              const diff = weddingDate - now;
+
+              if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                setTimeLeft({ days, hours, minutes, seconds });
+              }
+            }, 1000);
+
+            return () => clearInterval(timer);
+          }, []);
+
+          const { col1, col2, col3, col4, col5 } = weddingData.heroImages;
+
+          return (
+            <section className="relative h-screen overflow-hidden bg-rose-50 flex items-center justify-center">
+              {/* Background Scrolling Wall */}
+              <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-5 gap-2 px-1 rotate-0 md:-rotate-2 scale-110 opacity-50 pointer-events-none select-none">
+                 <div className="flex flex-col gap-2 animate-scroll-up">
+                    {[...col1, ...col1].map((src, i) => (
+                        <img key={`c1-${i}`} src={src} className="rounded w-full h-48 object-cover odd:h-64 even:h-56" alt="" />
+                    ))}
+                 </div>
+                 <div className="flex flex-col gap-2 animate-scroll-down mt-[-100px]">
+                    {[...col2, ...col2].map((src, i) => (
+                        <img key={`c2-${i}`} src={src} className="rounded w-full h-80 object-cover odd:h-56 even:h-64" alt="" />
+                    ))}
+                 </div>
+                 <div className="flex flex-col gap-2 animate-scroll-up">
+                    {[...col3, ...col3].map((src, i) => (
+                        <img key={`c3-${i}`} src={src} className="rounded w-full h-64 object-cover odd:h-48 even:h-80" alt="" />
+                    ))}
+                 </div>
+                 <div className="hidden md:flex flex-col gap-2 animate-scroll-down">
+                    {[...col4, ...col4].map((src, i) => (
+                        <img key={`c4-${i}`} src={src} className="rounded w-full h-72 object-cover odd:h-56" alt="" />
+                    ))}
+                 </div>
+                 <div className="hidden lg:flex flex-col gap-2 animate-scroll-up mt-[-150px]">
+                     {[...col5, ...col5].map((src, i) => (
+                        <img key={`c5-${i}`} src={src} className="rounded w-full h-64 object-cover odd:h-80" alt="" />
+                    ))}
+                 </div>
+              </div>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-soft-pink via-soft-pink/90 to-transparent"></div>
+              <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px]"></div>
+
+              <div className="relative z-10 text-center px-6">
+                <div className="mb-2 animate-float">
+                    <i className="fas fa-heart text-rose-gold text-3xl drop-shadow-md"></i>
+                </div>
+                
+                <div className="mb-6">
+                    <p className="font-serif italic text-lg md:text-xl text-gray-500 mb-2">Trân trọng kính mời quý khách</p>
+                    <p className="font-sans uppercase tracking-[0.2em] text-sm md:text-base text-deep-rose font-bold">Đến dự lễ thành hôn của</p>
+                </div>
+                
+                <h1 className="font-script text-6xl md:text-8xl lg:text-9xl mb-4 leading-none text-deep-rose drop-shadow-sm">
+                    Mạnh Dũng <br className="md:hidden" /> <span className="text-4xl md:text-6xl text-rose-300">&</span> <br className="md:hidden" /> Ngọc Ánh
+                </h1>
+                
+                <p className="font-serif italic text-lg md:text-2xl mb-8 text-gray-600 font-light">
+                    <i className="fas fa-holly-berry text-xmas-red mr-2"></i> Vào lúc 10h00 - Ngày 21 tháng 12 <i className="fas fa-gifts text-xmas-green ml-2"></i>
+                </p>
+
+                <div className="inline-block border-y border-deep-rose/20 py-3 px-8 bg-white/60 backdrop-blur-md rounded-full shadow-sm mb-8">
+                    <p className="text-2xl md:text-3xl font-serif text-deep-rose font-bold tracking-widest">21 • 12 • 2025</p>
+                </div>
+                
+                <div className="flex flex-wrap justify-center items-end gap-3 md:gap-6 font-xmas text-deep-rose max-w-4xl mx-auto">
+                    <div className="relative group">
+                        <div className="bg-white/80 backdrop-blur border-2 border-rose-200 rounded-xl w-20 h-24 md:w-28 md:h-32 flex flex-col items-center justify-center shadow-lg relative z-10">
+                            <span className="text-3xl md:text-5xl font-bold">{String(timeLeft.days).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-gray-500 font-sans mt-1">Ngày</span>
+                        </div>
+                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-4xl animate-climb-side z-20">
+                            👶 <div className="absolute -top-3 left-1 text-xl">🎅</div>
+                        </div>
+                        <div className="absolute -top-3 left-0 right-0 h-4 bg-white rounded-full opacity-80 z-20"></div>
+                    </div>
+
+                    <div className="relative group mt-8 md:mt-0">
+                        <div className="absolute -top-10 left-0 w-full text-center text-4xl animate-crawl-top z-0">
+                            👶 <div className="absolute -top-3 left-2 text-xl">🦌</div>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur border-2 border-rose-200 rounded-xl w-20 h-24 md:w-28 md:h-32 flex flex-col items-center justify-center shadow-lg relative z-10">
+                            <span className="text-3xl md:text-5xl font-bold">{String(timeLeft.hours).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-gray-500 font-sans mt-1">Giờ</span>
+                        </div>
+                    </div>
+
+                    <div className="relative group">
+                        <div className="bg-white/80 backdrop-blur border-2 border-rose-200 rounded-xl w-20 h-24 md:w-28 md:h-32 flex flex-col items-center justify-center shadow-lg relative z-10">
+                            <span className="text-3xl md:text-5xl font-bold">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-gray-500 font-sans mt-1">Phút</span>
+                        </div>
+                        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-4xl animate-swing-hang z-0 origin-top">
+                            <div className="w-0.5 h-4 bg-rose-300 mx-auto"></div> 
+                            👶 <div className="absolute top-0 right-0 text-xl">⛄</div>
+                        </div>
+                    </div>
+
+                    <div className="relative group mt-8 md:mt-0">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 text-4xl animate-peek-aboo z-0">
+                            👶
+                        </div>
+                        <div className="bg-white/80 backdrop-blur border-2 border-rose-200 rounded-xl w-20 h-24 md:w-28 md:h-32 flex flex-col items-center justify-center shadow-lg relative z-10">
+                            <span className="text-3xl md:text-5xl font-bold text-red-600">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-gray-500 font-sans mt-1">Giây</span>
+                        </div>
+                        <div className="absolute -top-2 -right-2 text-2xl z-20">🎀</div>
+                    </div>
+                </div>
+              </div>
+              
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce text-deep-rose/40">
+                <i className="fas fa-chevron-down text-xl"></i>
+              </div>
+            </section>
+          );
+        };
+
+        // 4. WeddingEvents
+        const WeddingEvents = () => {
+          const { groom, bride } = weddingData.weddingEvents;
+
+          return (
+            <section className="py-16 md:py-24 px-4 bg-white relative z-10">
+                <div className="text-center mb-12">
+                    <h2 className="font-script text-5xl md:text-6xl text-deep-rose mb-2">Thông Tin Lễ Cưới</h2>
+                    <p className="font-sans text-gray-400 text-xs tracking-widest uppercase">Wedding Events</p>
+                </div>
+
+                <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12">
+                    {/* Nhà Trai */}
+                    <div className="bg-soft-pink rounded-2xl overflow-hidden shadow-lg border border-rose-100 group hover:shadow-xl transition">
+                        <div className="p-8 text-center">
+                            <div className="inline-block p-3 rounded-full bg-white mb-4 shadow-sm group-hover:scale-110 transition">
+                                <i className="fas fa-glass-cheers text-2xl text-deep-rose"></i>
+                            </div>
+                            <h3 className="font-serif text-3xl font-bold text-gray-800 mb-2">{groom.title}</h3>
+                            <p className="text-rose-500 font-bold uppercase tracking-widest text-sm mb-4">Nhà Trai</p>
+                            <div className="space-y-2 mb-6 text-gray-600">
+                                <p className="text-xl font-serif font-bold">{groom.time}</p>
+                                <p className="font-sans text-sm">{groom.date}</p>
+                                <p className="font-serif italic px-4">{groom.locationName}</p>
+                                <p className="text-sm text-gray-500">{groom.address}</p>
+                            </div>
+                        </div>
+                        <div className="map-container h-64 w-full bg-gray-200 relative">
+                            <iframe 
+                                src={groom.mapUrl}
+                                loading="lazy" 
+                                className="w-full h-full border-0"
+                                title="Map Nhà Trai"
+                            ></iframe>
+                            <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="absolute bottom-4 right-4 bg-white text-xs px-3 py-1 rounded shadow text-deep-rose hover:bg-deep-rose hover:text-white transition">
+                                <i className="fas fa-map-marker-alt mr-1"></i> Mở rộng
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Nhà Gái */}
+                    <div className="bg-soft-pink rounded-2xl overflow-hidden shadow-lg border border-rose-100 group hover:shadow-xl transition">
+                        <div className="p-8 text-center">
+                            <div className="inline-block p-3 rounded-full bg-white mb-4 shadow-sm group-hover:scale-110 transition">
+                                <i className="fas fa-heart text-2xl text-deep-rose"></i>
+                            </div>
+                            <h3 className="font-serif text-3xl font-bold text-gray-800 mb-2">{bride.title}</h3>
+                            <p className="text-rose-500 font-bold uppercase tracking-widest text-sm mb-4">Nhà Gái</p>
+                            <div className="space-y-2 mb-6 text-gray-600">
+                                <p className="text-xl font-serif font-bold">{bride.time}</p>
+                                <p className="font-sans text-sm">{bride.date}</p>
+                                <p className="font-serif italic px-4">{bride.locationName}</p>
+                                <p className="text-sm text-gray-500">{bride.address}</p>
+                            </div>
+                        </div>
+                        <div className="map-container h-64 w-full bg-gray-200 relative">
+                            <iframe 
+                                src={bride.mapUrl}
+                                loading="lazy" 
+                                className="w-full h-full border-0"
+                                title="Map Nhà Gái"
+                            ></iframe>
+                             <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="absolute bottom-4 right-4 bg-white text-xs px-3 py-1 rounded shadow text-deep-rose hover:bg-deep-rose hover:text-white transition">
+                                <i className="fas fa-map-marker-alt mr-1"></i> Mở rộng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+          );
+        };
+
+        // 5. LoveStory
+        const LoveStory = () => {
+          return (
+            <section className="py-16 px-6 max-w-6xl mx-auto relative z-10">
+                <div className="text-center mb-16">
+                    <h2 className="font-script text-5xl text-deep-rose mb-3">Love Story</h2>
+                    <div className="w-16 h-1 bg-rose-gold mx-auto rounded-full mb-4 opacity-50"></div>
+                    <p className="font-serif text-gray-500 italic text-sm md:text-base">"Yêu là tìm thấy hạnh phúc của mình trong hạnh phúc của người khác"</p>
+                </div>
+                
+                <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
+                    <div className="w-full md:w-1/2 order-1 md:order-1">
+                        <div className="relative p-2 bg-white shadow-lg rounded transform -rotate-2 hover:rotate-0 transition duration-500">
+                            <img src={weddingData.loveStory.firstMeet} className="w-full h-64 md:h-80 object-cover rounded filter sepia-[.2] hover:sepia-0 transition" alt="First Meet" />
+                        </div>
+                    </div>
+                    <div className="w-full md:w-1/2 md:pl-10 text-center md:text-left order-2 md:order-2">
+                        <h3 className="text-2xl md:text-3xl font-serif text-deep-rose font-bold mb-3">Ngày Đầu Gặp Gỡ</h3>
+                        <p className="font-sans text-gray-600 leading-relaxed text-sm md:text-base">"Chỉ một ánh mắt tình cờ tại quán cà phê góc phố, Dũng đã biết mình muốn tìm hiểu về cô gái đang ngồi đọc sách bên cửa sổ."</p>
+                        <div className="mt-4 inline-block px-4 py-1 bg-white border border-rose-200 text-deep-rose rounded-full text-xs font-bold uppercase tracking-widest">Mùa Thu 2020</div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="w-full md:w-1/2 text-center md:text-right order-2 md:order-1">
+                        <h3 className="text-2xl md:text-3xl font-serif text-deep-rose font-bold mb-3">Lời Cầu Hôn</h3>
+                        <p className="font-sans text-gray-600 leading-relaxed text-sm md:text-base">"Dưới ánh hoàng hôn Đà Lạt thơ mộng, anh đã quỳ xuống và em đã nói 'Em đồng ý'. Khoảnh khắc ấy thời gian như ngừng trôi."</p>
+                        <div className="mt-4 inline-block px-4 py-1 bg-white border border-rose-200 text-deep-rose rounded-full text-xs font-bold uppercase tracking-widest">Mùa Đông 2024</div>
+                    </div>
+                    <div className="w-full md:w-1/2 md:pl-10 order-1 md:order-2">
+                        <div className="relative p-2 bg-white shadow-lg rounded transform rotate-2 hover:rotate-0 transition duration-500">
+                            <img src={weddingData.loveStory.proposal} className="w-full h-64 md:h-80 object-cover rounded filter sepia-[.2] hover:sepia-0 transition" alt="Proposal" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+          );
+        };
+
+        // 6. Gallery
+        const Gallery = () => {
+          const [selectedImage, setSelectedImage] = useState(null);
+
+          const openLightbox = (src) => {
+            const highResUrl = src.replace('&w=600', '&w=1200').replace('&w=400', '&w=1200');
+            setSelectedImage(highResUrl);
+          };
+
+          const closeLightbox = () => {
+            setSelectedImage(null);
+          };
+
+          return (
+            <section className="py-16 px-4 bg-white/60 backdrop-blur-sm">
+                <div className="text-center mb-12">
+                    <h2 className="font-script text-5xl text-deep-rose mb-2">Album Kỷ Niệm</h2>
+                    <p className="font-sans text-gray-400 text-xs tracking-widest uppercase">Flip to see more</p>
+                </div>
+                
+                <div className="max-w-7xl mx-auto columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+                    {weddingData.gallery.map((photo, index) => (
+                        <div key={index} className={`break-inside-avoid flip-card ${photo.heightClass} group`} onClick={() => openLightbox(photo.src)}>
+                            <div className="flip-card-inner">
+                                <div className="flip-card-front">
+                                    <img src={photo.src} className="w-full h-full object-cover" alt={photo.title} />
+                                </div>
+                                <div className="flip-card-back">
+                                    <i className={`${photo.icon} text-3xl mb-2`}></i>
+                                    <p className="font-script text-2xl">{photo.title}</p>
+                                    {photo.subtitle && <p className="text-xs uppercase mt-1">{photo.subtitle}</p>}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {selectedImage && (
+                     <div className="fixed inset-0 z-[60] bg-white/95 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out" onClick={closeLightbox}>
+                         <img 
+                            src={selectedImage} 
+                            className="max-w-full max-h-[90vh] rounded shadow-2xl animate-[float_3s_ease-in-out_infinite] border-4 border-white" 
+                            alt="Gallery Fullscreen"
+                            onClick={(e) => e.stopPropagation()} 
+                         />
+                         <button className="absolute top-4 right-4 text-deep-rose text-4xl" onClick={closeLightbox}>
+                             &times;
+                         </button>
+                     </div>
+                )}
+            </section>
+          );
+        };
+
+        // 7. LuckyDraw
+        const LuckyDraw = () => {
+          const roles = [
+            { icon: '🍺', name: 'Trưởng Ban Tiếp Rượu', desc: 'Uống không say không về, ai mời cũng nhận!' },
+            { icon: '🍗', name: 'Dũng Sĩ Diệt Mồi', desc: 'Tập trung chuyên môn: Ăn hết thực đơn.' },
+            { icon: '📸', name: 'Thánh Sống Ảo', desc: 'Có mặt trong mọi khung hình, check-in mọi ngóc ngách.' },
+            { icon: '🧊', name: 'Chuyên Gia Gắp Đá', desc: 'Nhiệt tình hết mình, người làm lạnh bầu không khí.' },
+            { icon: '🎤', name: 'Ca Sĩ Giấu Mặt', desc: 'Cướp mic mọi lúc mọi nơi, hát hay không bằng hay hát.' },
+            { icon: '🗣️', name: 'Tổ Trưởng Tổ Buôn', desc: 'Thông tấn xã vỉa hè, chuyện gì cũng biết.' },
+            { icon: '🥂', name: 'Vận Động Viên Cụng Ly', desc: 'Cánh tay phải đắc lực của chú rể, 1, 2, 3... Zô!' },
+            { icon: '🧐', name: 'Thám Tử Soi Make-up', desc: 'Soi từng đường kim mũi chỉ, phấn son cô dâu.' },
+            { icon: '✉️', name: 'Người Vận Chuyển', desc: 'Ship phong bì, ship tình yêu, ship luôn cả người say.' },
+            { icon: '😴', name: 'Đại Biểu Ngủ Gật', desc: 'Ăn no căng da bụng, chùng da mắt.' },
+            { icon: '💃', name: 'Nữ Hoàng Sàn Nhảy', desc: 'Nhạc lên là quẩy, bất chấp hình tượng.' },
+            { icon: '🤳', name: 'Streamer Đám Cưới', desc: 'Livestream toàn bộ sự kiện cho cộng đồng mạng.' },
+          ];
+        
+          const [currentRole, setCurrentRole] = useState(null);
+          const [isSpinning, setIsSpinning] = useState(false);
+          const intervalRef = useRef(null);
+
+          const startSpin = () => {
+            if (isSpinning) return;
+
+            setIsSpinning(true);
+            let counter = 0;
+            const maxSpins = 20 + Math.floor(Math.random() * 10); 
+            
+            intervalRef.current = window.setInterval(() => {
+              const randomIndex = Math.floor(Math.random() * roles.length);
+              setCurrentRole(roles[randomIndex]);
+              counter++;
+
+              if (counter >= maxSpins) {
+                if (intervalRef.current) {
+                  clearInterval(intervalRef.current);
+                }
+                setIsSpinning(false);
+              }
+            }, 100);
+          };
+
+          return (
+            <section className="py-16 px-4 relative z-10 bg-rose-50 overflow-hidden">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+              <div className="absolute -bottom-8 left-20 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+
+              <div className="max-w-4xl mx-auto text-center relative z-20">
+                <div className="mb-10">
+                   <h2 className="font-script text-5xl text-deep-rose mb-3">Góc Vui Nhộn</h2>
+                   <p className="font-serif text-gray-600 italic">Bạn sẽ giữ chức vụ gì trong đám cưới của chúng tôi?</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border-4 border-rose-100 p-8 md:p-12 max-w-lg mx-auto transform transition-all hover:shadow-2xl">
+                    
+                    <div className="min-h-[200px] flex flex-col items-center justify-center mb-8">
+                        {currentRole ? (
+                            <div className={`transition-all duration-300 ${isSpinning ? 'scale-90 opacity-80 blur-[1px]' : 'scale-100 opacity-100'}`}>
+                                <div className="text-6xl md:text-8xl mb-4 animate-bounce">
+                                    {currentRole.icon}
+                                </div>
+                                <h3 className="text-2xl md:text-3xl font-bold text-deep-rose mb-2 font-serif">
+                                    {currentRole.name}
+                                </h3>
+                                <p className="text-gray-500 italic px-4">
+                                    {currentRole.desc}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="text-gray-400">
+                                <i className="fas fa-question-circle text-6xl mb-4 text-rose-200"></i>
+                                <p className="text-lg">Nhấn nút bên dưới để xem định mệnh!</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <button 
+                        onClick={startSpin}
+                        disabled={isSpinning}
+                        className={`
+                            group relative px-8 py-4 bg-gradient-to-r from-deep-rose to-rose-500 
+                            text-white font-bold rounded-full text-lg shadow-lg 
+                            transition-all duration-200 transform
+                            ${isSpinning ? 'cursor-not-allowed opacity-80' : 'hover:scale-105 hover:shadow-rose-300/50 hover:shadow-xl active:scale-95'}
+                        `}
+                    >
+                        {isSpinning ? (
+                            <span className="flex items-center">
+                                <i className="fas fa-spinner fa-spin mr-2"></i> Đang Quay...
+                            </span>
+                        ) : (
+                            <span className="flex items-center">
+                                <i className="fas fa-dice mr-2 group-hover:rotate-180 transition-transform duration-500"></i> Bốc Thăm Ngay
+                            </span>
+                        )}
+                    </button>
+                </div>
+              </div>
+            </section>
+          );
+        };
+
+        // 8. Wishes
+        const Wishes = () => {
+          const [submitted, setSubmitted] = useState(false);
+          const [loading, setLoading] = useState(false);
+          
+          const [wishes, setWishes] = useState([
+            { 
+                id: 1, 
+                name: "Hoàng Minh", 
+                guestType: "Nhà Trai", 
+                message: "Chúc hai bạn trăm năm hạnh phúc, sớm sinh quý tử nhé! Rất tiếc vì công tác xa không về dự được.", 
+                date: "20/12/2025",
+                attendees: 1
+            },
+            { 
+                id: 2, 
+                name: "Thùy Linh", 
+                guestType: "Nhà Gái", 
+                message: "Cô dâu xinh quá! Chúc mừng hạnh phúc nha. Hẹn gặp mọi người vào ngày trọng đại.", 
+                date: "19/12/2025",
+                attendees: 2
+            },
+            { 
+                id: 3, 
+                name: "Tuấn Anh", 
+                guestType: "Nhà Trai", 
+                message: "Happy Wedding! Mãi bên nhau bạn nhé. 1, 2, 3 zô!", 
+                date: "18/12/2025",
+                attendees: 1
+            }
+          ]);
+
+          const handleSubmit = async (e) => {
+            e.preventDefault();
+            setLoading(true);
+
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const guestType = formData.get('guest_of');
+            const attendeesVal = formData.get('attendees');
+            const attendees = attendeesVal ? parseInt(attendeesVal, 10) : 1;
+            const message = formData.get('message');
+            
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCrw6aKIrFRn7nvevv-yhTAoK2lcs45p2ZBjmrq3J25Vvnian7ENmijHCWArQsc6li/exec";
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' 
+                });
+
+                setLoading(false);
+                setSubmitted(true);
+                
+                const newWish = {
+                    id: Date.now(),
+                    name: name || "Giấu tên",
+                    guestType: guestType || "Khách mời",
+                    message: message,
+                    date: new Date().toLocaleDateString('vi-VN'),
+                    attendees: attendees
+                };
+                
+                setWishes(prev => [newWish, ...prev]);
+
+                setTimeout(() => {
+                     setSubmitted(false);
+                     form.reset();
+                }, 3000);
+
+            } catch (error) {
+                console.error("Error submitting form", error);
+                setLoading(false);
+                alert("Có lỗi xảy ra, vui lòng thử lại sau!");
+            }
+          };
+
+          return (
+            <section className="py-16 md:py-24 px-4 relative z-10 bg-gradient-to-t from-white to-soft-pink">
+                <div className="max-w-3xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden border border-rose-100 mb-16">
+                    <div className="p-8 md:p-12 text-center">
+                        <i className="fas fa-envelope-open-text text-4xl text-rose-300 mb-4 animate-bounce"></i>
+                        <h3 className="font-script text-5xl text-deep-rose mb-2">Gửi Lời Chúc</h3>
+                        <p className="font-serif text-gray-500 italic mb-8">Sự hiện diện và những lời chúc phúc của bạn là niềm vinh hạnh lớn nhất của chúng tôi.</p>
+                        
+                        <form className="space-y-5 text-left" onSubmit={handleSubmit}>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1 ml-1">Họ tên của bạn</label>
+                                <input name="name" required type="text" className="w-full bg-rose-50 border-b-2 border-rose-100 p-3 rounded focus:outline-none focus:border-deep-rose transition placeholder-gray-400" placeholder="VD: Nguyễn Văn A" />
+                            </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1 ml-1">Bạn là khách của</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer bg-rose-50 px-4 py-2 rounded-full border border-rose-100 hover:bg-rose-100 transition">
+                                        <input type="radio" name="guest_of" value="Nhà Trai" className="accent-deep-rose" defaultChecked /> Nhà Trai
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer bg-rose-50 px-4 py-2 rounded-full border border-rose-100 hover:bg-rose-100 transition">
+                                        <input type="radio" name="guest_of" value="Nhà Gái" className="accent-deep-rose" /> Nhà Gái
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1 ml-1">Số người tham dự</label>
+                                <input 
+                                    name="attendees"
+                                    required 
+                                    type="number" 
+                                    min="1" 
+                                    max="10"
+                                    defaultValue="1"
+                                    className="w-full bg-rose-50 border-b-2 border-rose-100 p-3 rounded focus:outline-none focus:border-deep-rose transition placeholder-gray-400" 
+                                    placeholder="Số lượng" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1 ml-1">Lời nhắn gửi</label>
+                                <textarea name="message" required rows={4} className="w-full bg-rose-50 border-b-2 border-rose-100 p-3 rounded focus:outline-none focus:border-deep-rose transition placeholder-gray-400" placeholder="Viết lời chúc tốt đẹp nhất..."></textarea>
+                            </div>
+                            <button 
+                                type="submit"
+                                disabled={loading || submitted}
+                                className={`w-full font-sans font-bold uppercase tracking-widest py-4 rounded-xl shadow-lg transition duration-300 mt-4 flex items-center justify-center
+                                    ${submitted ? 'bg-green-600 text-white' : 'bg-deep-rose text-white hover:bg-rose-700 hover:shadow-xl hover:-translate-y-1'}
+                                `}
+                            >
+                                {loading ? (
+                                     <i className="fas fa-spinner fa-spin mr-2"></i>
+                                ) : submitted ? (
+                                    <>
+                                        <i className="fas fa-check mr-2"></i> Đã Gửi Thành Công
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-paper-plane mr-2"></i> Gửi Lời Chúc
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h3 className="font-script text-4xl text-deep-rose mb-2">Sổ Lưu Bút</h3>
+                        <div className="w-12 h-0.5 bg-rose-300 mx-auto opacity-60"></div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {wishes.map((wish, index) => (
+                            <div 
+                                key={wish.id} 
+                                className="wish-card-animate bg-white p-6 rounded-2xl shadow-sm border border-rose-100 hover:shadow-md transition duration-300 flex flex-col relative group"
+                                style={{ animationDelay: `${index < 9 ? index * 150 : 0}ms` }}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-deep-rose font-bold font-serif">
+                                            {wish.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-800 text-sm">{wish.name}</h4>
+                                            <p className="text-[10px] text-gray-400">{wish.date}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className={`block text-[10px] px-2 py-1 rounded-full border uppercase tracking-wider mb-1 ${
+                                            wish.guestType === 'Nhà Trai' 
+                                            ? 'bg-blue-50 text-blue-800 border-blue-100' 
+                                            : 'bg-pink-50 text-pink-800 border-pink-100'
+                                        }`}>
+                                            {wish.guestType}
+                                        </span>
+                                        {wish.attendees && (
+                                            <span className="text-[10px] text-gray-500">
+                                                <i className="fas fa-user-friends mr-1"></i>
+                                                {wish.attendees} người
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex-grow pb-2">
+                                     <p className="font-serif italic text-gray-600 text-sm leading-relaxed">"{wish.message}"</p>
+                                </div>
+                                
+                                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100">
+                                    <i className="fas fa-heart text-rose-300 hover:text-deep-rose cursor-pointer text-lg"></i>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+          );
+        };
+
+        // 9. Footer
+        const Footer = () => {
+          return (
+            <footer className="bg-deep-rose text-white py-10 text-center font-sans text-xs tracking-widest relative z-10">
+                <p className="mb-3 text-3xl font-script">Mạnh Dũng & Ngọc Ánh</p>
+                <p className="opacity-70 mb-4">21 . 12 . 2025</p>
+                <div className="flex justify-center gap-4 text-xl opacity-80">
+                    <a href="#" className="hover:text-rose-200"><i className="fab fa-facebook"></i></a>
+                    <a href="#" className="hover:text-rose-200"><i className="fab fa-instagram"></i></a>
+                </div>
+            </footer>
+          );
+        };
+
+        // --- APP COMPONENT ---
+        const App = () => {
+          return (
+            <div className="bg-soft-pink text-gray-800 font-serif antialiased overflow-x-hidden relative selection:bg-rose-200">
+              <MusicPlayer />
+              <FallingEffect />
+              
+              <Hero />
+              <WeddingEvents />
+              <LoveStory />
+              <Gallery />
+              <LuckyDraw />
+              <Wishes />
+              <Footer />
+            </div>
+          );
+        };
+
+        // --- RENDER ---
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
